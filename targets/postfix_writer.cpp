@@ -302,6 +302,33 @@ void m19::postfix_writer::do_or_node(cdk::or_node * const node, int lvl) {
   _pf.ALIGN();
   _pf.LABEL(mklbl(endlbl));
 }
+void m19::postfix_writer::do_plus_equal_node(m19::plus_equal_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+
+  node->rvalue()->accept(this, lvl + 2);
+
+  node->lvalue()->accept(this, lvl + 2);
+  if (basic_type::TYPE_DOUBLE == node->type()->name()) {
+    _pf.LDDOUBLE();
+  } else {
+    _pf.LDINT();
+  }
+
+  _pf.ADD();
+  if (basic_type::TYPE_DOUBLE == node->type()->name()) {
+    _pf.DUP64();
+  } else {
+    _pf.DUP32();
+  }
+
+  node->lvalue()->accept(this, lvl + 2);
+  if (basic_type::TYPE_DOUBLE == node->type()->name()) {
+    _pf.STDOUBLE();
+  } else {
+    _pf.STINT();
+  }
+
+}
 
 //===========================================================================
 // VARIABLES

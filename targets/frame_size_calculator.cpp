@@ -111,6 +111,9 @@ void m19::frame_size_calculator::do_break_node(m19::break_node *const node, int 
 void m19::frame_size_calculator::do_function_declaration_node(m19::function_declaration_node *const node, int lvl) {
   // VOID
 }
+void m19::frame_size_calculator::do_plus_equal_node(m19::plus_equal_node * const node, int lvl) {
+  // VOID
+}
 void m19::frame_size_calculator::do_address_of_node(m19::address_of_node *const node, int lvl) {
   // VOID
 }

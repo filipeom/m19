@@ -22,7 +22,7 @@
   basic_type           *type;       /* EXPRESSION TYPES */
 };
 %token tPRIVATE tEXTERNAL tPUBLIC
-%token tBREAK tCONTINUE tRETURN tPRINTLN
+%token tBREAK tCONTINUE tRETURN tPRINTLN tPLUS
 %token tINSEC tFINSEC
 
 %token<i> tINTEGER
@@ -43,6 +43,7 @@
 %nonassoc ':'
 
 %right '='
+%right tPLUS
 %left tOR
 %left tAND
 %nonassoc '~'
@@ -225,6 +226,7 @@ expression   : literal                     { $$ = $1; }
              /* ASSIGNMENT */
              | lvalue '=' expression       { $$ = new cdk::assignment_node(LINE, $1, $3); }
              | '@'    '=' expression       { $$ = new cdk::assignment_node(LINE, new cdk::variable_node(LINE, "@"), $3); }
+             | lvalue tPLUS expression     { $$ = new m19::plus_equal_node(LINE, $1, $3); }
              ;
 
 opt_expr     : /*VOID*/                    { $$ = new cdk::sequence_node(LINE); }

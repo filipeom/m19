@@ -162,6 +162,8 @@ void m19::xml_writer::do_and_node(cdk::and_node * const node, int lvl) {
 void m19::xml_writer::do_or_node(cdk::or_node * const node, int lvl) {
   do_binary_expression(node, lvl);
 }
+void m19::xml_writer::do_plus_equal_node(m19::plus_equal_node * const node, int lvl) {
+}
 
 //===========================================================================
 // VARIABLES

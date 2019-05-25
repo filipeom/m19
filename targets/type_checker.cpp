@@ -214,6 +214,79 @@ void m19::type_checker::do_and_node(cdk::and_node * const node, int lvl) {
 void m19::type_checker::do_or_node(cdk::or_node * const node, int lvl) {
   processIntOnlyExpression(node, lvl);
 }
+void m19::type_checker::do_plus_equal_node(m19::plus_equal_node * const node, int lvl) {
+  ASSERT_UNSPEC;
+
+  node->lvalue()->accept(this, lvl + 4);
+  node->rvalue()->accept(this, lvl + 4);
+
+  if (basic_type::TYPE_INT == node->lvalue()->type()->name()) {
+    if (basic_type::TYPE_INT == node->rvalue()->type()->name()) {
+      node->type(new basic_type(4, basic_type::TYPE_INT));
+    } else if (basic_type::TYPE_UNSPEC == node->rvalue()->type()->name()) {
+      node->type(new basic_type(4, basic_type::TYPE_INT));
+      node->rvalue()->type(new basic_type(4, basic_type::TYPE_INT));
+    } else
+      throw std::string("wrong assignment to integer");
+  } else if (basic_type::TYPE_POINTER == node->lvalue()->type()->name()) {
+    if (basic_type::TYPE_POINTER == node->rvalue()->type()->name()) {
+      // CHECK POINTER LEVEL AND TYPE
+      basic_type *ltype = node->lvalue()->type()->subtype();
+      basic_type *rtype = node->rvalue()->type();
+      for (; nullptr != ltype; ltype = ltype->subtype(), rtype = rtype->subtype()) {
+        if (nullptr == rtype->subtype()) {
+          throw std::string("undefined right value data type");
+        } else if (basic_type::TYPE_UNSPEC == rtype->subtype()->name() &&
+            basic_type::TYPE_POINTER != ltype->name()) {
+          // STACK ALLOC
+          rtype->_subtype = new basic_type(ltype->size(), ltype->name());
+        } else if (rtype->subtype()->name() != ltype->name()) {
+          throw std::string("wrong assignment to pointer");
+        }
+      }
+      node->type(copy_type(node->lvalue()->type()));
+    } else if (basic_type::TYPE_INT == node->rvalue()->type()->name()) {
+      // CHECK INT LITERAL FOR 0
+      cdk::integer_node *literal = dynamic_cast<cdk::integer_node*>(node->rvalue());
+      if (nullptr != literal) {
+        if (0 == literal->value()) {
+          node->type(new basic_type(4, basic_type::TYPE_POINTER));
+        } else {
+          throw std::string("invalid integer assignment to pointer");
+        }
+      } else {
+        throw std::string("wrong assignment to pointer");
+      }
+    } else if (basic_type::TYPE_UNSPEC == node->rvalue()->type()->name()) {
+      node->type(new basic_type(4, basic_type::TYPE_ERROR));
+      node->rvalue()->type(new basic_type(4, basic_type::TYPE_ERROR));
+    } else {
+      throw std::string("wrong assignment to pointer");
+    }
+  } else if (basic_type::TYPE_DOUBLE == node->lvalue()->type()->name()) {
+    if (basic_type::TYPE_DOUBLE == node->rvalue()->type()->name() ||
+        basic_type::TYPE_INT == node->rvalue()->type()->name()) {
+      node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+    } else if (basic_type::TYPE_UNSPEC == node->rvalue()->type()->name()) {
+      node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+      node->rvalue()->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+    } else {
+      throw std::string("wrong assignment to real");
+    }
+  } else if (basic_type::TYPE_STRING == node->lvalue()->type()->name()) {
+    if (basic_type::TYPE_STRING == node->rvalue()->type()->name()) {
+      node->type(new basic_type(4, basic_type::TYPE_STRING));
+    } else if (basic_type::TYPE_UNSPEC == node->rvalue()->type()->name()) {
+      node->type(new basic_type(4, basic_type::TYPE_STRING));
+      node->rvalue()->type(new basic_type(4, basic_type::TYPE_STRING));
+    } else {
+      throw std::string("wrong assignment to string");
+    }
+  } else {
+    throw std::string("wrong types in assignment");
+  }
+
+}
 
 //===========================================================================
 // VARIABLES
