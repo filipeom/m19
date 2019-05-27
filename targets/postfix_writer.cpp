@@ -655,18 +655,18 @@ void m19::postfix_writer::do_apply_node(m19::apply_node * const node, int lvl) {
   node->base()->accept(this, lvl);
   _pf.LOCAL(offset);
   _pf.LDINT();
-  // MUST BE POINTER
   if (basic_type::TYPE_DOUBLE == node->base()->type()->subtype()->name()) {
     _pf.INT(3);
   } else {
     _pf.INT(2);
   }
   _pf.SHTL();
+  // FUNCTION CALL
   _pf.ADD();
   _pf.CALL(node->function());
-  // TRASH ARGUMENT
   _pf.TRASH(4);
   _pf.LDFVAL32();
+  // INSTRUCTION ;
   _pf.TRASH(4);
   
   // INCREMENT LOCAL
@@ -674,8 +674,11 @@ void m19::postfix_writer::do_apply_node(m19::apply_node * const node, int lvl) {
   _pf.LDINT();
   _pf.INT(1);
   _pf.ADD();
+  _pf.DUP32();
   _pf.LOCAL(offset);
   _pf.STINT();
+  // INSTRUCTION ;
+  _pf.TRASH(4);
 
   // JUMP TO COND
   _pf.JMP(mklbl(condlbl));
