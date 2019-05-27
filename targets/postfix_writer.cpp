@@ -656,7 +656,11 @@ void m19::postfix_writer::do_apply_node(m19::apply_node * const node, int lvl) {
   _pf.LOCAL(offset);
   _pf.LDINT();
   // MUST BE POINTER
-  _pf.INT(2);
+  if (basic_type::TYPE_DOUBLE == node->base()->type()->subtype()->name()) {
+    _pf.INT(3);
+  } else {
+    _pf.INT(2);
+  }
   _pf.SHTL();
   _pf.ADD();
   _pf.CALL(node->function());
