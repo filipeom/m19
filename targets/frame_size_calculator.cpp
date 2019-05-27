@@ -120,6 +120,9 @@ void m19::frame_size_calculator::do_address_of_node(m19::address_of_node *const 
 void m19::frame_size_calculator::do_continue_node(m19::continue_node *const node, int lvl) {
   // VOID
 }
+void m19::frame_size_calculator::do_apply_node(m19::apply_node * const node, int lvl) {
+  _localsize += 4;
+}
 void m19::frame_size_calculator::do_identity_node(m19::identity_node *const node, int lvl) {
   // VOID
 }

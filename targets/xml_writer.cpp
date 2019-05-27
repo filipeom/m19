@@ -342,6 +342,9 @@ void m19::xml_writer::do_evaluation_node(m19::evaluation_node * const node, int 
   node->argument()->accept(this, lvl + 2);
   closeTag(node, lvl);
 }
+void m19::xml_writer::do_apply_node(m19::apply_node * const node, int lvl) {
+  // TODo
+}
 
 //===========================================================================
 // CONDITIONAL INSTRUCTIONS

@@ -22,7 +22,7 @@
   basic_type           *type;       /* EXPRESSION TYPES */
 };
 %token tPRIVATE tEXTERNAL tPUBLIC
-%token tBREAK tCONTINUE tRETURN tPRINTLN tPLUS
+%token tBREAK tCONTINUE tRETURN tPRINTLN tPLUS tAPPLY tTO tRANGE
 %token tINSEC tFINSEC
 
 %token<i> tINTEGER
@@ -168,6 +168,11 @@ instruction     : expression ';'           { $$ = new m19::evaluation_node(LINE,
                 | tBREAK                   { $$ = new m19::break_node(LINE); }
                 | tCONTINUE                { $$ = new m19::continue_node(LINE); }
                 | tRETURN                  { $$ = new m19::return_node(LINE); }
+                | tAPPLY tID tTO lvalue ':' expression tRANGE expression ';'
+                                           {
+                                             $$ = new m19::apply_node(LINE, *$2, new cdk::rvalue_node(LINE,$4), $6, $8);
+                                             delete $2;
+                                           }
                 | cond_inst                { $$ = $1; }
                 | iter_inst                { $$ = $1; }
                 | block                    { $$ = $1; }

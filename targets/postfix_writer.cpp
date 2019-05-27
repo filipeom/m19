@@ -627,6 +627,59 @@ void m19::postfix_writer::do_evaluation_node(m19::evaluation_node * const node, 
   node->argument()->accept(this, lvl);
   _pf.TRASH(node->argument()->type()->size());
 }
+void m19::postfix_writer::do_apply_node(m19::apply_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+
+  int offset;
+  int condlbl = ++_lbl;
+  int endlbl = ++_lbl;
+
+  // AUTOMATIC LOCAL VARIABLE THAT HOLDS CURRENT INDEX
+  _offset -= 4;
+  offset = _offset;
+
+  node->from()->accept(this, lvl);
+  _pf.LOCAL(offset);
+  _pf.STINT();
+
+  _pf.ALIGN();
+  _pf.LABEL(mklbl(condlbl));
+  // WHILE CONDITION
+  _pf.LOCAL(offset);
+  _pf.LDINT();
+  node->to()->accept(this, lvl);
+  _pf.LE();
+  _pf.JZ(mklbl(endlbl));
+  
+  // ADD ARGUMENTS TO STACK 
+  node->base()->accept(this, lvl);
+  _pf.LOCAL(offset);
+  _pf.LDINT();
+  // MUST BE POINTER
+  _pf.INT(2);
+  _pf.SHTL();
+  _pf.ADD();
+  _pf.CALL(node->function());
+  // TRASH ARGUMENT
+  _pf.TRASH(4);
+  _pf.LDFVAL32();
+  _pf.TRASH(4);
+  
+  // INCREMENT LOCAL
+  _pf.LOCAL(offset);
+  _pf.LDINT();
+  _pf.INT(1);
+  _pf.ADD();
+  _pf.LOCAL(offset);
+  _pf.STINT();
+
+  // JUMP TO COND
+  _pf.JMP(mklbl(condlbl));
+
+  // WHILE END
+  _pf.ALIGN();
+  _pf.LABEL(mklbl(endlbl));
+}
 
 //===========================================================================
 // CONDITIONAL INSTRUCTIONS

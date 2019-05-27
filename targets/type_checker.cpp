@@ -525,6 +525,35 @@ void m19::type_checker::do_return_node(m19::return_node * const node, int lvl) {
 void m19::type_checker::do_evaluation_node(m19::evaluation_node * const node, int lvl) {
   node->argument()->accept(this, lvl + 2);
 }
+void m19::type_checker::do_apply_node(m19::apply_node * const node, int lvl) {
+
+  const std::string &id = (("@" == node->function()) ? _function->name() : node->function());
+  std::shared_ptr<m19::symbol> symbol = _symtab.find(id);
+
+  if (nullptr == symbol) {
+    throw std::string("symbol \"" + id + "\" is undeclared.");
+  }
+
+  if (false == symbol->isFunction()) {
+    throw std::string("symbol \"" + id + "\" is not a function.");
+  }
+
+  node->base()->accept(this, lvl + 2);
+  if (basic_type::TYPE_POINTER != node->base()->type()->name()) {
+    throw std::string("pointer expression expected in index left-value");
+  }
+
+  node->from()->accept(this, lvl + 2);
+  if (basic_type::TYPE_INT != node->from()->type()->name()) {
+    throw std::string("integer expected in left range value");
+  }
+
+  node->to()->accept(this, lvl + 2);
+  if (basic_type::TYPE_INT != node->from()->type()->name()) {
+    throw std::string("integer expected in right range value");
+  }
+
+}
 
 //===========================================================================
 // CONDITIONAL INSTRUCTIONS
